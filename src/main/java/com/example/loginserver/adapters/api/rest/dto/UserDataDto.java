@@ -17,6 +17,7 @@ public class UserDataDto {
     String city;
     String zip;
     String country;
+    String roles;
 
     public static UserDataDto from(UserData userData) {
         return UserDataDto.builder()

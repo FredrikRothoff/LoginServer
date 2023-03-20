@@ -17,7 +17,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void createUser(UserData userData, UserStatus userStatus) {
-        String sql = "INSERT INTO users (email, password, first_name, last_name, phone, address, city, zip, country) VALUES (:email, :password, :first_name, :last_name, :phone, :address, :city, :zip, :country)";
+        String sql = "INSERT INTO users (email, password, first_name, last_name, phone, address, city, zip, country, roles) VALUES (:email, :password, :first_name, :last_name, :phone, :address, :city, :zip, :country, :roles)";
         MapSqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("email", userData.getEmail())
                 .addValue("password", userData.getPassword())
@@ -27,7 +27,8 @@ public class UserDbStorage implements UserStorage {
                 .addValue("address", userData.getAddress())
                 .addValue("city", userData.getCity())
                 .addValue("zip", userData.getZip())
-                .addValue("country", userData.getCountry());
+                .addValue("country", userData.getCountry())
+                .addValue("roles", "USER"); // Set role to 'user' by default
         namedParameterJdbcTemplate.update(sql, parameterSource);
     }
 
