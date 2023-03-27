@@ -3,6 +3,7 @@ package com.example.loginserver.adapters.api.rest;
 import com.example.loginserver.adapters.api.rest.dto.UserLoginRequestDto;
 import com.example.loginserver.configuration.security.JwtUtil;
 import com.example.loginserver.core.UserManager;
+import com.example.loginserver.core.domain.UserData;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -36,15 +37,15 @@ public class CredentialsController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserLoginRequestDto loginDto) {
-        HttpStatus status = userManager.findByEmailAndPassword(loginDto.getEmail(), loginDto.getPassword());
-        if (status == HttpStatus.OK) {
+    public ResponseEntity<UserData> login(@RequestBody UserLoginRequestDto loginDto) {
+        UserData user = userManager.findByEmailAndPassword(loginDto.getEmail(), loginDto.getPassword());
+        if (user != null) {
             UserDetails userDetails = new User(loginDto.getEmail(), loginDto.getPassword(), new ArrayList<>());
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("Bearer " + token);
             return ResponseEntity.ok()
                     .header("Authorization", "Bearer " + token)
-                    .build();
+                    .body(user);
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
     }

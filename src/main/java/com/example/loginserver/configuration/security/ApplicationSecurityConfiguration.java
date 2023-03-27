@@ -33,14 +33,12 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
         http.authorizeRequests()
-                .antMatchers("/user").permitAll()
                 .antMatchers(HttpMethod.POST, "/user").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/user").permitAll()
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/login/forgot").permitAll()
-                .antMatchers(HttpMethod.PATCH, "/user/update").authenticated() // require authentication for /user/update
+                .antMatchers(HttpMethod.DELETE, "/user/delete").authenticated()
+                .antMatchers(HttpMethod.PATCH, "/user/update").authenticated()
                 .anyRequest().permitAll()
                 .and()
                 .csrf().disable();

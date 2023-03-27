@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,22 +33,10 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> deleteUser(@RequestBody UserData userData) {
-        HttpStatus status = userManager.deleteUser(userData);
-        if (status == HttpStatus.OK) {
-            return ResponseEntity.ok("User deleted successfully");
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
-        }
-    }
-
-    @PatchMapping("/update")
-    public ResponseEntity<String> updateUser(@RequestBody UserData user) {
+    public ResponseEntity<String> deleteUser(@RequestBody UserData user) {
         try {
-            HttpStatus status = userManager.updateUser(user);
-            return ResponseEntity.status(status).body("User updated successfully");
+            HttpStatus status = userManager.deleteUser(user);
+            return ResponseEntity.status(status).body("User deleted successfully");
         } catch (
                 UserNotFoundException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -58,5 +46,26 @@ public class UserController {
         }
     }
 
-
+    @PatchMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody UserData user, UsernamePasswordAuthenticationToken authentication) {
+        String email = authentication.getName();
+        try {
+            HttpStatus status = userManager.updateUser(user, email);
+            return ResponseEntity.status(status).body("User updated successfully");
+        } catch (
+                UserNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+        } catch (
+                InvalidCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        } catch (
+                ResponseStatusException ex) {
+            throw ex;
+        } catch (
+                Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating user");
+        }
+    }
 }
+
+

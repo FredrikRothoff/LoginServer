@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
-public class UserDbStorage implements UserStorage {
+public class JdbcUserStorage implements UserStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 

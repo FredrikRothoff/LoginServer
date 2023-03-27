@@ -16,7 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 import static com.example.loginserver.core.domain.CredentialsStatus.USER_FOUND;
-import static com.example.loginserver.core.domain.UserStatus.*;
+import static com.example.loginserver.core.domain.UserStatus.CREATED_SUCCESSFULLY;
+import static com.example.loginserver.core.domain.UserStatus.UPDATE_SUCCESSFULLY;
 
 @AllArgsConstructor
 @Slf4j
@@ -35,20 +36,11 @@ public class UserManager {
     }
 
     public HttpStatus deleteUser(UserData userData) {
-        Optional<UserData> deletedUser = userStorage.findByEmail(userData.getEmail());
-        if (deletedUser.isEmpty()) {
-            throw new UserNotFoundException("Could not find user by " + userData.getEmail());
-        }
-        userStorage.deleteUser(userData, DELETED_SUCCESSFULLY);
-        return HttpStatus.OK;
-    }
-
-    public HttpStatus updateUser(UserData userData) {
         Optional<UserData> user = userStorage.findByEmail(userData.getEmail());
         if (user.isPresent()) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             if (passwordEncoder.matches(userData.getPassword(), user.get().getPassword())) {
-                userStorage.updateUser(userData.encryptPassword(), UPDATE_SUCCESSFULLY);
+                userStorage.deleteUser(userData.encryptPassword(), UPDATE_SUCCESSFULLY);
                 return HttpStatus.OK;
             }
             throw new InvalidCredentialsException("Invalid password for user: " + userData.getEmail());
@@ -56,6 +48,21 @@ public class UserManager {
         throw new UserNotFoundException("Could not find user by " + userData.getEmail());
     }
 
+    public HttpStatus updateUser(UserData userData, String email) {
+        if (!email.equals(userData.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email in token does not match email in request body");
+        }
+        Optional<UserData> user = userStorage.findByEmail(email);
+        if (user.isPresent()) {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            if (passwordEncoder.matches(userData.getPassword(), user.get().getPassword())) {
+                userStorage.updateUser(userData.encryptPassword(), UPDATE_SUCCESSFULLY);
+                return HttpStatus.OK;
+            }
+            throw new InvalidCredentialsException("Invalid password for user: " + email);
+        }
+        throw new UserNotFoundException("Could not find user by " + email);
+    }
 
     public HttpStatus findByEmail(String email) {
         Optional<UserData> user = credentialsStorage.findByEmail(email, USER_FOUND);
@@ -65,12 +72,12 @@ public class UserManager {
         throw new UserNotFoundException("Could not find user by " + email);
     }
 
-    public HttpStatus findByEmailAndPassword(String email, String password) {
+    public UserData findByEmailAndPassword(String email, String password) {
         Optional<UserData> user = credentialsStorage.findByEmail(email, USER_FOUND);
         if (user.isPresent()) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             if (passwordEncoder.matches(password, user.get().getPassword())) {
-                return HttpStatus.OK;
+                return user.get();
             }
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");

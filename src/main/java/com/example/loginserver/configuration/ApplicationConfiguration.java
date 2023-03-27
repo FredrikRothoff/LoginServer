@@ -1,7 +1,7 @@
 package com.example.loginserver.configuration;
 
 import com.example.loginserver.adapters.spi.CredentialsDbStorage;
-import com.example.loginserver.adapters.spi.UserDbStorage;
+import com.example.loginserver.adapters.spi.JdbcUserStorage;
 import com.example.loginserver.core.UserManager;
 import com.example.loginserver.core.ports.store.CredentialsStorage;
 import com.example.loginserver.core.ports.store.UserStorage;
@@ -14,7 +14,7 @@ public class ApplicationConfiguration {
 
     @Bean
     public UserStorage userStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        return new UserDbStorage(namedParameterJdbcTemplate);
+        return new JdbcUserStorage(namedParameterJdbcTemplate);
     }
 
     @Bean
