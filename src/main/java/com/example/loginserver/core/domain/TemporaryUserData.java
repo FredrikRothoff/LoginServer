@@ -5,9 +5,11 @@ import lombok.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 @Value
 @Builder
-public class UserData {
+public class TemporaryUserData {
 
     String first_name;
     String last_name;
@@ -18,11 +20,12 @@ public class UserData {
     String city;
     String zip;
     String country;
+    UUID token;
 
-    public UserData encryptPassword() {
+    public TemporaryUserData encryptPassword() {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encryptedPassword = passwordEncoder.encode(password);
-        return new UserData(first_name, last_name, email, phone, encryptedPassword, address, city
-                , zip, country);
+        return new TemporaryUserData(first_name, last_name, email, phone, encryptedPassword,
+                address, city, zip, country, token);
     }
 }

@@ -26,27 +26,13 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .antMatchers("/h2-console/**"); // allow access to h2-console
+        web.ignoring().antMatchers("/h2-console/**"); // allow access to h2-console
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-        http.authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/user").permitAll()
-                .antMatchers(HttpMethod.POST, "/login").permitAll()
-                .antMatchers(HttpMethod.POST, "/login/forgot").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/user/delete").authenticated()
-                .antMatchers(HttpMethod.PATCH, "/user/update").authenticated()
-                .anyRequest().permitAll()
-                .and()
-                .csrf().disable();
+        http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
+                UsernamePasswordAuthenticationFilter.class);
+        http.authorizeRequests().antMatchers(HttpMethod.POST, "/user").permitAll().antMatchers(HttpMethod.POST, "/user/signup").permitAll().antMatchers(HttpMethod.POST, "/user/confirm").permitAll().antMatchers(HttpMethod.POST, "/login").permitAll().antMatchers(HttpMethod.POST, "/forgot").permitAll().antMatchers(HttpMethod.DELETE, "/user/delete").authenticated().antMatchers(HttpMethod.PATCH, "/user/update").authenticated().antMatchers(HttpMethod.PATCH, "/updatePassword").authenticated().anyRequest().permitAll().and().csrf().disable();
     }
 }
-
-
-
-
-
-
